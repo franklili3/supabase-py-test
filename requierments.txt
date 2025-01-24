@@ -1,0 +1,4 @@
+supabase==2.11.0
+postgest==0.19.1
+requests==2.32.3
+pandas==2.2.3

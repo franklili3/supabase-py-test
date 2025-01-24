@@ -14,13 +14,15 @@ import uuid
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
-row_dict = {"id": str(uuid.uuid4())}
 route = '/rest/v1/test3'
-# 将字典转换为 JSON 字符串
-row_json = json.dumps(row_dict)
-#row_json = json.loads(row_dict)
-
-print('row_json: ', row_json)
+table_name = 'test3'
+post_url = url + route
+#access_token = response4_json['session']['access_token']
+headers ={
+        "apikey": key,
+        "Authorization": "Bearer " + key,
+        "Content-Type": "application/json"
+    }
 '''
 supabase_user_email = os.environ.get('supabase_user_email')
 supabase_user_password = os.environ.get('supabase_user_password')
@@ -35,6 +37,11 @@ if response4_json['user']['aud'] == 'authenticated':
     
 # Update data by supabase
 def update_by_supabase(row_json):
+    row_dict = {"id": str(uuid.uuid4())}
+    # 将字典转换为 JSON 字符串
+    row_json = json.dumps(row_dict)
+    #row_json = json.loads(row_dict)
+    print('row_json: ', row_json)
     try:
         response3 = (
             supabase.table("test3")#bitcoin_trade_signal
@@ -52,15 +59,13 @@ def update_by_supabase(row_json):
         raise Exception(f"Failed to update data: {response3}")
 
     
-# Post data by requests 
-post_url = url + route
-#access_token = response4_json['session']['access_token']
-headers ={
-        "apikey": key,
-        "Authorization": "Bearer " + key,
-        "Content-Type": "application/json"
-    }
+
 def insert_by_requests(row_json):
+    row_dict = {"id": str(uuid.uuid4())}
+    # 将字典转换为 JSON 字符串
+    row_json = json.dumps(row_dict)
+    #row_json = json.loads(row_dict)
+    print('row_json: ', row_json)
     try:
         response3 = requests.post(post_url, headers=headers, data=row_json)
         if response3.status_code == 201:
@@ -72,6 +77,11 @@ def insert_by_requests(row_json):
         print(f"Failed to post data: {e}")
 
 def update_by_requests(row_json):
+    row_dict = {"id": str(uuid.uuid4())}
+    # 将字典转换为 JSON 字符串
+    row_json = json.dumps(row_dict)
+    #row_json = json.loads(row_dict)
+    print('row_json: ', row_json)
     params =  {'accumulated_blocks': 'eq.879690' }
     print('params: ', params)
 
@@ -84,7 +94,28 @@ def update_by_requests(row_json):
             raise Exception(f"{response3.text}")
     except Exception as e:
         print(f"Failed to post data: {e}")
-        raise                                
-update_by_requests(row_json)
+        raise   
+def select_by_supabase():
+    response4 = supabase.table(table_name).select("accumulated_blocks").gt("accumulated_blocks", 879690).execute()
+    response4_json = json.loads(response4.model_dump_json())
+    response4_str = str(response4_json)
+    data = response4_json['data']
+    data_str = str(data)
+    if len(data) > 0:
+        return 'get data success.' + data_str
+    else:
+        return "Failed to get data:" + response4_str
+     
+def select_by_requests():
+    params = {'accumulated_blocks': 'gt.879690' }
+    response5 = requests.get(post_url, params=params, headers=headers)
+    if response5.status_code == 200:
+        print(f'get data success.{response5.data}')
+    else:
+        raise Exception(f"Failed to get data: {response5.text}")
+#update_by_requests(row_json)
     
-#update_by_supabase(row_json)
+result = select_by_supabase()
+#select_by_requests
+# update_by_supabase(row_json)
+print(result)
